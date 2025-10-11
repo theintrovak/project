@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import Link from "next/link";
 
@@ -11,7 +11,7 @@ export default function Login() {
         <div
             className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-amber-400 via-orange-300 to-pink-400 overflow-hidden"
         >
-            {/* Decorative Background Blobs */}
+            {/* Background decorative SVGs */}
             <svg
                 className="absolute top-0 left-0 w-64 h-64 text-white opacity-30 blur-2xl"
                 viewBox="0 0 200 200"
@@ -39,10 +39,21 @@ export default function Login() {
             {/* Login Card */}
             <div className="relative z-10 flex flex-col w-[90%] max-w-md bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/20">
                 <h1 className="text-3xl font-bold text-white text-center mb-6 drop-shadow-lg">
-                    Login
+                    Signup
                 </h1>
 
                 <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
+                    <label htmlFor="username" className="text-white font-medium">
+                        Username :
+                    </label>
+                    <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        placeholder="Your username"
+                        className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
+                    />
+
                     <label htmlFor="email" className="text-white font-medium">
                         Email :
                     </label>
@@ -57,17 +68,19 @@ export default function Login() {
                     <label htmlFor="password" className="text-white font-medium">
                         Password :
                     </label>
+
                     <input
                         type={showpassword ? "text" : "password"}
                         name="password"
                         id="password"
                         placeholder="••••••••"
                         className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
+
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showpassword)}
-                        className="absolute right-12 top-[246px]  text-gray-600 hover:text-amber-600 transition"
+                        className="absolute right-12 top-[340px]  text-gray-600 hover:text-amber-600 transition"
                     >
                         {showpassword ? (
                             // 👁️ Eye-open icon
@@ -109,18 +122,19 @@ export default function Login() {
                         )}
                     </button>
 
+
                     <button
                         type="submit"
                         className="mt-6 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-xl transition-all duration-300"
                     >
-                        Login
+                        Create Account
                     </button>
                 </form>
 
                 <p className="text-white text-center mt-6 text-sm">
-                    Don’t have an account?{" "}
-                    <Link href="/signup" className="text-amber-500 hover:underline">
-                        Signup here
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-amber-500 hover:underline">
+                        Login here
                     </Link>
                 </p>
             </div>
