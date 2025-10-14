@@ -1,10 +1,38 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Spinner } from "@/components/ui/spinner"
+
 
 export default function Login() {
+    const [buttonDisabled, setButtonDisabled] = useState(true);
+
+    const router = useRouter();
     const [showpassword, setShowPassword] = useState(false);
-    const handleSubmit = () => {
+    const [user, setUser] = useState({
+        name: "",
+        email: "",
+        password: "",
+    });
+    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        if (user.name.length > 4 && user.email.length > 4 && user.password.length >= 5) {
+            setButtonDisabled(false);
+        }
+
+    }, [user])
+    const handleSubmit = async () => {
+        try {
+            const response = await axios.post("/api/signup/route", user);
+            if (response.status === 201) {
+                router.push("/login");
+            }
+        } catch (error) {
+            console.log(error + "error in User Signing Up");
+
+        }
 
     }
     return (
@@ -36,7 +64,7 @@ export default function Login() {
                 />
             </svg>
 
-            {/* Login Card */}
+            {/* signup Card */}
             <div className="relative z-10 flex flex-col w-[90%] max-w-md bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/20">
                 <h1 className="text-3xl font-bold text-white text-center mb-6 drop-shadow-lg">
                     Signup
@@ -71,6 +99,18 @@ export default function Login() {
 
                     <input
                         type={showpassword ? "text" : "password"}
+                        name="password"
+                        id="password"
+                        placeholder="••••••••"
+                        className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
+
+                    />
+                    <label htmlFor="password" className="text-white font-medium">
+                        Confirm Password :
+                    </label>
+
+                    <input
+                        type="password"
                         name="password"
                         id="password"
                         placeholder="••••••••"
@@ -122,12 +162,12 @@ export default function Login() {
                         )}
                     </button>
 
-
+                    {loading && <Spinner />}
                     <button
                         type="submit"
                         className="mt-6 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-xl transition-all duration-300"
                     >
-                        Create Account
+                        {buttonDisabled ? "Not Allowed" : "Sign Up"}
                     </button>
                 </form>
 
