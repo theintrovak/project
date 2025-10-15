@@ -27,7 +27,7 @@ export default function Login() {
         setLoading(true);
         const loadingToast = toast.loading("Creating your account...");
         try {
-            const response = await axios.post("api/signup", user);
+            const response = await axios.post("api/user/signup", user);
             toast.dismiss(loadingToast);
             if (response) {
                 console.log("Signup successful");

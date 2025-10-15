@@ -20,12 +20,12 @@ export default function Login() {
         const loadingToast = toast.loading("Logging in...");
         try {
             setLoading(true);
-            const response = await axios.post("api/login", user)
+            const response = await axios.post("api/user/login", user)
             toast.dismiss(loadingToast);
             if (response) {
                 toast.success("Login successful!");
                 console.log("Login successful");
-                router.push("/");
+                router.push("/profile");
             }
         } catch (error: unknown) {
             toast.dismiss(loadingToast);
