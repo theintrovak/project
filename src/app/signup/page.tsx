@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/spinner"
 
 
 export default function Login() {
-    const [buttonDisabled, setButtonDisabled] = useState(true);
+
 
     const router = useRouter();
     const [showpassword, setShowPassword] = useState(false);
@@ -18,20 +18,23 @@ export default function Login() {
     });
     const [loading, setLoading] = useState(false);
     useEffect(() => {
-        if (user.name.length > 4 && user.email.length > 4 && user.password.length >= 5) {
-            setButtonDisabled(false);
-        }
+
 
     }, [user])
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
         try {
-            const response = await axios.post("/api/signup/route", user);
-            if (response.status === 201) {
+            const response = await axios.post("api/signup", user);
+            if (response) {
+                console.log("Signup successful");
                 router.push("/login");
             }
         } catch (error) {
-            console.log(error + "error in User Signing Up");
+            console.log("Signup failed", error);
 
+        } finally {
+            setLoading(false);
         }
 
     }
@@ -76,6 +79,9 @@ export default function Login() {
                     </label>
                     <input
                         type="text"
+                        value={user.name}
+                        onChange={(e) => setUser({ ...user, name: e.target.value })}
+                        required
                         name="username"
                         id="username"
                         placeholder="Your username"
@@ -88,6 +94,9 @@ export default function Login() {
                     <input
                         type="email"
                         name="email"
+                        value={user.email}
+                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                        required
                         id="email"
                         placeholder="you@example.com"
                         className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
@@ -98,23 +107,30 @@ export default function Login() {
                     </label>
 
                     <input
-                        type={showpassword ? "text" : "password"}
+                        type="password"
                         name="password"
                         id="password"
+                        value={user.password}
+                        onChange={(e) => setUser({ ...user, password: e.target.value })}
+                        required
                         placeholder="••••••••"
-                        className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
-
+                        className="p-2 mb-0 rounded-lg border-none focus:ring-2 focus:ring-amber-500  outline-none text-gray-800"
                     />
-                    <label htmlFor="password" className="text-white font-medium">
+                    {showpassword && <div className="relative mt-0 border 
+                    rounded-2xl p-2 space-y-2 bg-[#ffffff5c] overflow-visible ">
+                        <p> {user.password} </p>
+                    </div>}
+                    <label htmlFor="confirmPassword" className="text-white font-medium mt-4">
                         Confirm Password :
                     </label>
 
                     <input
                         type="password"
-                        name="password"
-                        id="password"
+                        name="confirmPassword"
+                        required
+                        id="confirmPassword"
                         placeholder="••••••••"
-                        className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
+                        className=" p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
 
                     />
                     <button
@@ -162,12 +178,14 @@ export default function Login() {
                         )}
                     </button>
 
-                    {loading && <Spinner />}
+
                     <button
                         type="submit"
                         className="mt-6 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-xl transition-all duration-300"
                     >
-                        {buttonDisabled ? "Not Allowed" : "Sign Up"}
+                        {loading ? (<><Spinner />
+                            <span> Signing Up</span>
+                        </>) : ("Sign Up")}
                     </button>
                 </form>
 
