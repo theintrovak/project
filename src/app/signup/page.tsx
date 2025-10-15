@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner"
+import toast from "react-hot-toast";
 
 
 export default function Login() {
@@ -24,14 +25,25 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        const loadingToast = toast.loading("Creating your account...");
         try {
             const response = await axios.post("api/signup", user);
+            toast.dismiss(loadingToast);
             if (response) {
                 console.log("Signup successful");
                 router.push("/login");
+                toast.success("Signup successful!");
             }
-        } catch (error) {
-            console.log("Signup failed", error);
+        } catch (error: unknown) {
+            toast.dismiss(loadingToast);
+            if (axios.isAxiosError(error)) {
+                const message = error.response?.data?.message || "Something went wrong!";
+                toast.error(message);
+            } else if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
 
         } finally {
             setLoading(false);

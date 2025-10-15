@@ -10,18 +10,31 @@ export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
         const { email, password } = reqBody;
-        console.log(reqBody, "data fetched");
+
 
         // Check if user already exists
         const user = await User.findOne({ email });
         if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 400 })
+            return NextResponse.json({
+                success: false,
+                message: "User Not Found",
+                hint: "Try with different email in instead",
+            },
+                { status: 400 }
+            );
         }
+
 
         // Check if password is correct
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return NextResponse.json({ error: "Invalid credentials" }, { status: 400 })
+            return NextResponse.json({
+                success: false,
+                message: "this password is incorrect",
+                hint: "Try with different password in instead",
+            },
+                { status: 400 }
+            );
         }
         const tokendata = {
             id: user._id,
@@ -32,6 +45,8 @@ export async function POST(request: NextRequest) {
         const token = await jwt.sign(tokendata, process.env.JWT_SECRET as string, { expiresIn: "1d" });
         const response = NextResponse.json({ message: "Login successful", success: true }, { status: 200 });
         response.cookies.set("token", token, { httpOnly: true });
+
+        console.log("login successfull");
         return response
 
     }

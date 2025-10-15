@@ -1,11 +1,46 @@
 "use client"
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Spinner } from "@/components/ui/spinner"
+import toast from "react-hot-toast";
+
 
 export default function Login() {
+    const router = useRouter();
     const [showpassword, setShowPassword] = useState(false);
-    const handleSubmit = () => {
+    const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState({
+        email: "",
+        password: "",
+    });
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const loadingToast = toast.loading("Logging in...");
+        try {
+            setLoading(true);
+            const response = await axios.post("api/login", user)
+            toast.dismiss(loadingToast);
+            if (response) {
+                toast.success("Login successful!");
+                console.log("Login successful");
+                router.push("/");
+            }
+        } catch (error: unknown) {
+            toast.dismiss(loadingToast);
+            if (axios.isAxiosError(error)) {
+                const message = error.response?.data?.message || "Something went wrong!";
+                toast.error(message);
+            } else if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
 
+        } finally {
+            setLoading(false);
+        }
     }
     return (
         <div
@@ -23,7 +58,6 @@ export default function Login() {
                     transform="translate(100 100)"
                 />
             </svg>
-
             <svg
                 className="absolute bottom-0 right-0 w-72 h-72 text-white opacity-25 blur-2xl"
                 viewBox="0 0 200 200"
@@ -49,6 +83,8 @@ export default function Login() {
                     <input
                         type="email"
                         name="email"
+                        value={user.email}
+                        onChange={(e) => setUser({ ...user, email: e.target.value })}
                         id="email"
                         placeholder="you@example.com"
                         className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
@@ -58,12 +94,18 @@ export default function Login() {
                         Password :
                     </label>
                     <input
-                        type={showpassword ? "text" : "password"}
+                        type="password"
                         name="password"
+                        value={user.password}
+                        onChange={(e) => setUser({ ...user, password: e.target.value })}
                         id="password"
                         placeholder="••••••••"
                         className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
                     />
+                    {showpassword && <div className="relative mt-0 border 
+                    rounded-2xl p-2 space-y-2 bg-[#ffffff5c] overflow-visible ">
+                        <p> {user.password} </p>
+                    </div>}
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showpassword)}
@@ -113,7 +155,7 @@ export default function Login() {
                         type="submit"
                         className="mt-6 py-2 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 hover:shadow-xl transition-all duration-300"
                     >
-                        Login
+                        {loading ? <><Spinner /><span>Loading</span></> : "Login"}
                     </button>
                 </form>
 
