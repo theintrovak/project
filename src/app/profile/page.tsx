@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Edit2, Mail, MapPin, Phone, LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -7,9 +7,32 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 
 export default function ProfilePage() {
+    interface User {
+        _id: string;
+        name: string;
+        email: string;
+        isAdmin: boolean;
+        isVerified: boolean;
+        __v: number;
+    }
     const router = useRouter();
     const [editing, setEditing] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+    useEffect(() => {
+        try {
+            const fetchUser = async () => {
+                const response = await axios.get("/api/user/me");
+                setUser(response.data.data);
+                console.log(response.data.data);
+            }
+            fetchUser();
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong");
 
+        }
+
+    }, [])
     const handleLogout = async () => {
         const loadingToast = toast.loading("Logging out...");
         try {
@@ -48,10 +71,10 @@ export default function ProfilePage() {
                         </button>
                     </div>
                     <h1 className="text-2xl mt-4 font-semibold text-white break-words">
-                        Anurag Chaudhary
+                        {user?.name}
                     </h1>
                     <p className="text-gray-300 flex flex-col sm:flex-row sm:items-center sm:gap-2 mt-1 text-sm sm:text-base">
-                        <Mail size={16} /> anurag@example.com
+                        <Mail size={16} />{user?.email}
                     </p>
                 </div>
 
