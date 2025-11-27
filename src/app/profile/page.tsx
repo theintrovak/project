@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 
 export default function ProfilePage() {
+
     interface User {
         _id: string;
         name: string;
