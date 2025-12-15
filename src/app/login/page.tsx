@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner"
 import toast from "react-hot-toast";
+import { WavyBackground } from "@/components/ui/wavy-background";
+import { Meteors } from "@/components/ui/meteors";
 
 
 export default function Login() {
@@ -15,6 +17,13 @@ export default function Login() {
         email: "",
         password: "",
     });
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const loadingToast = toast.loading("Logging in...");
@@ -43,35 +52,10 @@ export default function Login() {
         }
     }
     return (
-        <div
-            className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-amber-400 via-orange-300 to-pink-400 overflow-hidden"
-        >
-            {/* Decorative Background Blobs */}
-            <svg
-                className="absolute top-0 left-0 w-64 h-64 text-white opacity-30 blur-2xl"
-                viewBox="0 0 200 200"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    fill="currentColor"
-                    d="M40.5,-59.5C52.8,-50.4,63.4,-40.5,68.8,-28.2C74.2,-15.9,74.5,-1.1,68.4,11.8C62.3,24.7,49.8,35.7,37.1,47.1C24.4,58.4,12.2,70.2,-1.6,72.3C-15.4,74.5,-30.8,67,-42.5,56.2C-54.2,45.3,-62.3,31.1,-66.1,15.5C-69.9,-0.2,-69.4,-17.1,-62.8,-30.8C-56.2,-44.6,-43.6,-55.3,-29.7,-63.1C-15.9,-70.9,-8,-75.8,3,-79.3C14,-82.8,28,-85.1,40.5,-59.5Z"
-                    transform="translate(100 100)"
-                />
-            </svg>
-            <svg
-                className="absolute bottom-0 right-0 w-72 h-72 text-white opacity-25 blur-2xl"
-                viewBox="0 0 200 200"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    fill="currentColor"
-                    d="M50.4,-63.6C63.9,-52.7,72.8,-36.2,74.6,-19.1C76.3,-2,70.9,16,61.1,30.2C51.3,44.4,37.2,54.7,21.6,62.1C6,69.5,-11,74.1,-26.1,69.2C-41.2,64.4,-54.4,50.2,-62.4,33.5C-70.3,16.7,-73.1,-2.6,-68.1,-20.6C-63.1,-38.6,-50.3,-55.4,-34.2,-66.3C-18.1,-77.2,1.3,-82.2,18.8,-79.4C36.3,-76.7,50.4,-63.6,50.4,-63.6Z"
-                    transform="translate(100 100)"
-                />
-            </svg>
-
+        <WavyBackground>
             {/* Login Card */}
-            <div className="relative z-10 flex flex-col w-[90%] max-w-md bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/20">
+            <div className="overflow-hidden relative z-10 flex flex-col w-[90%] max-w-md bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/20">
+                <Meteors number={30} />
                 <h1 className="text-3xl font-bold text-white text-center mb-6 drop-shadow-lg">
                     Login
                 </h1>
@@ -94,7 +78,7 @@ export default function Login() {
                         Password :
                     </label>
                     <input
-                        type="password"
+                        type={showpassword ? "text" : "password"}
                         name="password"
                         value={user.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
@@ -102,10 +86,6 @@ export default function Login() {
                         placeholder="••••••••"
                         className="p-2 rounded-lg border-none focus:ring-2 focus:ring-amber-500 outline-none text-gray-800"
                     />
-                    {showpassword && <div className="relative mt-0 border 
-                    rounded-2xl p-2 space-y-2 bg-[#ffffff5c] overflow-visible ">
-                        <p> {user.password} </p>
-                    </div>}
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showpassword)}
@@ -166,6 +146,6 @@ export default function Login() {
                     </Link>
                 </p>
             </div>
-        </div>
+        </WavyBackground>
     );
 }

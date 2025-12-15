@@ -16,11 +16,13 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.545.0",
     "mongoose": "^8.19.1",
-    "next": "15.5.4",
+    "motion": "^12.23.26",
+    "next": "^16.0.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",
-    "tailwind-merge": "^3.3.1"
+    "simplex-noise": "^4.0.3",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

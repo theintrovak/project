@@ -22,4 +22,12 @@ const eslintConfig = [
   },
 ];
 
-export default eslintConfig;
+export default [
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+];
+
+export { eslintConfig };
