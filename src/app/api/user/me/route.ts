@@ -8,7 +8,7 @@ connectDB();
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
-        const dbData = await User.findOne({ _id: userId }).select("-password ");
+        const dbData = await (User as any).findOne({ _id: userId }).select("-password ");
         return NextResponse.json({ success: true, data: dbData });
     } catch (error) {
         console.log(error);

@@ -5,9 +5,18 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner"
 import toast from "react-hot-toast";
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+import dynamic from "next/dynamic";
 import { Meteors } from "@/components/ui/meteors";
-import { WavyBackground } from "@/components/ui/wavy-background";
+
+
+
+const WavyBackground = dynamic(
+    () =>
+        import("@/components/ui/wavy-background").then(
+            (mod) => mod.WavyBackground
+        ),
+    { ssr: false }
+);
 
 
 /**
@@ -19,7 +28,7 @@ import { WavyBackground } from "@/components/ui/wavy-background";
  * If the request fails, it will display an error message to the user.
  * @returns {JSX.Element} The signup form component.
  */
-export default function Login() {
+export default function Signup() {
     const router = useRouter();
     const [showpassword, setShowPassword] = useState(false);
     const [user, setUser] = useState({
@@ -28,12 +37,11 @@ export default function Login() {
         password: "",
         confirmPassword: "",
     });
+
     const [loading, setLoading] = useState(false);
     useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "auto";
-        };
+        document.documentElement.style.backgroundColor = "#000";
+
     }, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -69,12 +77,10 @@ export default function Login() {
 
     }
     return (
-        <WavyBackground>
+        <WavyBackground className="min-h-screen flex items-center justify-center">
             {/* signup Card */}
             <div className="relative overflow-hidden z-10 flex flex-col w-[95%] max-w-sm bg-white/30 backdrop-blur-md p-8 px-10 rounded-3xl shadow-2xl border border-white/20">
-                <div className="absolute inset-0 -z-10 pointer-events-none">
-                    <Meteors number={50} />
-                </div>
+
 
                 <h1 className="text-3xl font-bold text-white text-center mb-4 drop-shadow-lg">
                     Signup

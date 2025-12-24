@@ -5,8 +5,14 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner"
 import toast from "react-hot-toast";
-import { WavyBackground } from "@/components/ui/wavy-background";
-import { Meteors } from "@/components/ui/meteors";
+import dynamic from "next/dynamic";
+const WavyBackground = dynamic(
+    () =>
+        import("@/components/ui/wavy-background").then(
+            (mod) => mod.WavyBackground
+        ),
+    { ssr: false }
+);
 
 
 export default function Login() {
@@ -17,12 +23,8 @@ export default function Login() {
         email: "",
         password: "",
     });
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "auto";
-        };
-    }, []);
+
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -52,10 +54,10 @@ export default function Login() {
         }
     }
     return (
-        <WavyBackground>
+        <WavyBackground className="min-h-screen flex items-center justify-center">
             {/* Login Card */}
             <div className="overflow-hidden relative z-10 flex flex-col w-[90%] max-w-md bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/20">
-                <Meteors number={30} />
+
                 <h1 className="text-3xl font-bold text-white text-center mb-6 drop-shadow-lg">
                     Login
                 </h1>

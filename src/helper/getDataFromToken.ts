@@ -8,7 +8,7 @@ export async function getDataFromToken(request: NextRequest) {
             if (typeof decodedToken === "string") {
                 throw new Error("Invalid token");
             }
-            return decodedToken.id;
+            return decodedToken.id as string;
         }
     } catch (error) {
         console.log(error);
