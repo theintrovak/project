@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --animate-first: moveVertical 30s ease infinite;
@@ -6,12 +9,31 @@
   --animate-third: moveInCircle 40s linear infinite;
   --animate-fourth: moveHorizontal 40s ease infinite;
   --animate-fifth: moveInCircle 20s ease infinite;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
 }
 
-html,
-body {
-  background-color: #000;
-}
+
 
 @keyframes moveHorizontal {
   0% {
@@ -72,5 +94,15 @@ body {
       transform: rotate(215deg) translateX(-500px);
       opacity: 0;
     }
+  }
+}
+
+@layer base {
+  * {
+    @apply border border-transparent;
+  }
+
+  body {
+    @apply bg-gray-100 dark:bg-gray-900;
   }
 }
