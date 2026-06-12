@@ -1,18 +1,19 @@
-"use client"
-import { NavbarDemo } from "@/components/navbar";
-import FeaturedProduct from "@/components/featuredProduct";
-export default function Home() {
+
+import FeaturedProduct from "@/components/porduct/featuredProduct";
+import AllProducts from "@/components/porduct/allProducts";
+import axios from 'axios';
+
+export default async function Home() {
+  const products = await axios.get(`${process.env.NEXTAUTH_URL}/api/product/featured`)
+  const allProducts = await axios.get(`${process.env.NEXTAUTH_URL}/api/product`)
+
 
   return (
     <>
-      <NavbarDemo />
-      <FeaturedProduct />
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <main>
+        <FeaturedProduct products={products.data} />
+        <AllProducts products={allProducts.data} />
 
-        <h1 className="text-3xl font-bold  hover:animate-ping">Anurag</h1>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => window.location.href = '/login'}>Login</button>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => window.location.href = '/signup'} >signup</button>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => window.location.href = '/profile'} >profile</button>
       </main>
     </>
   );

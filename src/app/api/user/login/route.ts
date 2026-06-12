@@ -4,9 +4,10 @@ import { NextResponse, NextRequest } from "next/server";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 
-connectDB();
+
 
 export async function POST(request: NextRequest) {
+    await connectDB();
     try {
         const reqBody = await request.json();
         const { email, password } = reqBody;
@@ -17,8 +18,8 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json({
                 success: false,
-                message: "User Not Found",
-                hint: "Try with different email in instead",
+                message: "invaliad email or password",
+                hint: "Try with different credentials in instead",
             },
                 { status: 400 }
             );
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest) {
         if (!isMatch) {
             return NextResponse.json({
                 success: false,
-                message: "this password is incorrect",
-                hint: "Try with different password in instead",
+                message: "invaliad email or password",
+                hint: "Try with different credentials in instead",
             },
                 { status: 400 }
             );
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
             email: user.email,
             isAdmin: user.isAdmin,
         }
-        const token = await jwt.sign(tokendata, process.env.JWT_SECRET as string, { expiresIn: "1d" });
+        const token = jwt.sign(tokendata, process.env.JWT_SECRET as string, { expiresIn: "5d" });
         const response = NextResponse.json({ message: "Login successful", success: true }, { status: 200 });
         response.cookies.set("token", token, { httpOnly: true });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 type User = {
     id: string;
@@ -24,13 +25,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await fetch("/api/auth/me", {
-                    credentials: "include",
-                });
+                const res = await axios.get("/api/user/me", { withCredentials: true });
+                console.log(res)
 
-                if (res.ok) {
-                    const data = await res.json();
-                    setUser(data.user);
+
+                if (res.status === 200) {
+
+                    setUser(res.data.data);
                 } else {
                     setUser(null);
                 }
@@ -45,10 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const logout = async () => {
-        await fetch("/api/auth/logout", {
-            method: "POST",
-            credentials: "include",
-        });
+        await axios.get("/api/user/logout");
         setUser(null);
     };
 

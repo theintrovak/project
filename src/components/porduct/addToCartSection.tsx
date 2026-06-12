@@ -88,6 +88,7 @@ export default function AddToCartSection({ product }: Props) {
                         quantity,
                     })
                 }
+
                 className="w-full bg-black text-white py-3 rounded hover:bg-gray-800"
             >
                 Add to Cart

@@ -4,8 +4,8 @@ import Image from "next/image";
 import { Edit2, Mail, MapPin, Phone, LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
-
 export default function ProfilePage() {
 
     interface User {
@@ -18,22 +18,8 @@ export default function ProfilePage() {
     }
     const router = useRouter();
     const [editing, setEditing] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
-    useEffect(() => {
-        try {
-            const fetchUser = async () => {
-                const response = await axios.get("/api/user/me");
-                setUser(response.data.data);
-                console.log(response.data.data);
-            }
-            fetchUser();
-        } catch (error) {
-            console.log(error);
-            toast.error("Something went wrong");
+    const { user } = useAuth();
 
-        }
-
-    }, [])
     const handleLogout = async () => {
         const loadingToast = toast.loading("Logging out...");
         try {

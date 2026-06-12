@@ -23,9 +23,6 @@ export default function Login() {
         email: "",
         password: "",
     });
-
-
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const loadingToast = toast.loading("Logging in...");

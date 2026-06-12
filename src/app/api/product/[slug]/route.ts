@@ -5,11 +5,18 @@ import Product from "@/models/productModel";
 connectDB();
 
 // get a single product 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+export async function GET(
+    req: Request,
+    context: { params: Promise<{ slug: string }> }
+) {
     try {
-        const product = await Product.findOne({ slug: params.slug });
+        const { slug } = await context.params;
+        const product = await Product.findOne({ slug });
+        console.log(product);
+
         if (!product) {
             return NextResponse.json({ message: "product not found", success: false }, { status: 404 });
+
         }
         return NextResponse.json(product);
 
