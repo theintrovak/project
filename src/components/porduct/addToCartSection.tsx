@@ -10,6 +10,9 @@ type Props = {
 export default function AddToCartSection({ product }: Props) {
     const { addToCart } = useCart();
 
+
+
+
     const [selectedColor, setSelectedColor] = useState(
         product.colors?.[0] || ""
     );
@@ -17,6 +20,7 @@ export default function AddToCartSection({ product }: Props) {
         product.sizes?.[0] || ""
     );
     const [quantity, setQuantity] = useState(1);
+    console.log(product)
 
     return (
         <div className="mt-6 space-y-4">
@@ -84,10 +88,12 @@ export default function AddToCartSection({ product }: Props) {
                         slug: product.slug,
                         color: selectedColor,
                         size: selectedSize,
-                        image: product.image,
+                        image: product.images,
                         quantity,
                     })
                 }
+
+
 
                 className="w-full bg-black text-white py-3 rounded hover:bg-gray-800"
             >
@@ -95,4 +101,6 @@ export default function AddToCartSection({ product }: Props) {
             </button>
         </div>
     );
+
+
 }

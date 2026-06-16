@@ -3,20 +3,14 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "@/components/ui/spinner"
 import toast from "react-hot-toast";
-import dynamic from "next/dynamic";
-const WavyBackground = dynamic(
-    () =>
-        import("@/components/ui/wavy-background").then(
-            (mod) => mod.WavyBackground
-        ),
-    { ssr: false }
-);
 
 
 export default function Login() {
     const router = useRouter();
+
     const [showpassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState({
@@ -32,7 +26,7 @@ export default function Login() {
             toast.dismiss(loadingToast);
             if (response) {
                 toast.success("Login successful!");
-                console.log("Login successful");
+                router.refresh();
                 router.push("/profile");
             }
         } catch (error: unknown) {
@@ -51,7 +45,7 @@ export default function Login() {
         }
     }
     return (
-        <WavyBackground className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen bg-gray-700 flex items-center justify-center">
             {/* Login Card */}
             <div className="overflow-hidden relative z-10 flex flex-col w-[90%] max-w-md bg-white/30 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-white/20">
 
@@ -145,6 +139,6 @@ export default function Login() {
                     </Link>
                 </p>
             </div>
-        </WavyBackground>
+        </div>
     );
 }

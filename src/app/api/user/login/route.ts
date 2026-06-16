@@ -5,9 +5,9 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 
 
-
+await connectDB();
 export async function POST(request: NextRequest) {
-    await connectDB();
+
     try {
         const reqBody = await request.json();
         const { email, password } = reqBody;
@@ -44,7 +44,14 @@ export async function POST(request: NextRequest) {
             isAdmin: user.isAdmin,
         }
         const token = jwt.sign(tokendata, process.env.JWT_SECRET as string, { expiresIn: "5d" });
-        const response = NextResponse.json({ message: "Login successful", success: true }, { status: 200 });
+        const response = NextResponse.json(
+            {
+                success: true,
+                message: "Login successful",
+                user: tokendata,
+            },
+            { status: 200 }
+        );
         response.cookies.set("token", token, { httpOnly: true });
 
         console.log("login successfull");

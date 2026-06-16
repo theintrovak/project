@@ -9,20 +9,28 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        lowercase: true,
+        trim: true,
     },
     password: {
         type: String,
         required: true,
+
     },
-    isAdmin: {
-        type: Boolean,
-        required: true,
-        default: false,
+    role: {
+        type: String,
+        enum: ["user", "admin"],
+        default: "user",
     },
     isVerified: {
         type: Boolean,
         required: true,
         default: false,
+    },
+    phone: {
+        type: String,
+        required: true,
+        unique: true
     },
     forgotPasswordToken: String,
     forgotPasswordTokenExpiry: Date,

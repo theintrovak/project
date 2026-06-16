@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
 import { Menu, X, ShoppingCart, User, Search } from "lucide-react";
 import {
     Navbar,
@@ -20,6 +22,10 @@ export default function NavBar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { user } = useAuth();
+    const router = useRouter();
+    const { getTotalItems } = useCart();
+
+    const count = getTotalItems();
     const navItems = [
         {
             name: "Shop",
@@ -41,7 +47,7 @@ export default function NavBar() {
                 <NavbarLogo />
                 <NavItems items={navItems} />
                 {/* Desktop Nav */}
-                <div className="flex items-center gap-4">
+                <div className={`${user ? "hidden" : "flex"} flex items-center gap-4`}>
                     <NavbarButton variant="secondary" href="/login">Login</NavbarButton>
                     <NavbarButton variant="primary" href="/signup">Signup</NavbarButton>
                 </div>
@@ -58,9 +64,9 @@ export default function NavBar() {
                     </div>
 
                     {/* Cart */}
-                    <Link href="/cart" className="relative rounded-md p-2 hover:bg-muted ">
+                    <Link href={user ? "/cart" : "/login"} className="relative rounded-md p-2 hover:bg-muted ">
                         <ShoppingCart className="h-5 w-5" />
-                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white">2</span>
+                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white">{count}</span>
                     </Link>
 
                     {/* Profile */}

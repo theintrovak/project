@@ -2,8 +2,6 @@
 import { createContext, useContext, useState, useEffect, use } from "react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "./AuthContext";
-import { totalmem } from "os";
-import { styleText } from "util";
 type cartItems = {
     _id: string;
     name: string;
@@ -53,10 +51,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             );
             if (existingItem) {
                 return prev.map((p) => p === existingItem
-                    ? { ...p, quantity: p.quantity + 1 }
+                    ? { ...p, quantity: p.quantity + item.quantity }
                     : p)
             }
-            return [...prev, { ...item, quantity: 1 }];
+            return [...prev, { ...item, quantity: item.quantity }];
         });
         toast.success(`${item.name} added to cart`);
     }

@@ -18,6 +18,7 @@ export default function ProfilePage() {
     }
     const router = useRouter();
     const [editing, setEditing] = useState(false);
+    const [add, setAdd] = useState(false);
     const { user } = useAuth();
 
     const handleLogout = async () => {
@@ -83,11 +84,7 @@ export default function ProfilePage() {
                             placeholder="Phone Number"
                             className="bg-transparent border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
                         />
-                        <input
-                            type="text"
-                            placeholder="Address"
-                            className="bg-transparent border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
-                        />
+
                         <button
                             type="submit"
                             className="bg-amber-500 hover:bg-amber-600 rounded-lg py-2 text-white font-semibold transition-all text-sm sm:text-base"
@@ -101,12 +98,31 @@ export default function ProfilePage() {
                             Personal Information
                         </h3>
                         <p className="flex items-center gap-2 break-all">
-                            <Phone size={16} className="text-amber-500" /> +91 98765 43210
+                            <Phone size={16} className="text-amber-500" /> +{user?.phone}
                         </p>
                         <p className="flex items-center gap-2 mt-1 break-words">
                             <MapPin size={16} className="text-amber-500" /> New Delhi, India
                         </p>
                     </div>
+                )}
+                {/* Add Address */}
+                {add && (
+
+                    <form className="flex flex-col gap-3 sm:gap-4">
+                        <p className="font-bold mt-5 text-amber-100 ">Add Your Address</p>
+                        <input
+                            type="text"
+                            placeholder="Address"
+                            className="bg-transparent border border-gray-600 rounded-lg p-2  text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
+                        />
+                        <button
+                            type="submit"
+                            className="bg-amber-500 hover:bg-amber-600 rounded-lg py-2 text-white font-semibold transition-all text-sm sm:text-base"
+                        >
+                            Add Address
+                        </button>
+
+                    </form>
                 )}
 
                 {/* Order Summary */}
@@ -135,6 +151,12 @@ export default function ProfilePage() {
                         className="w-full sm:w-auto px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-sm sm:text-base"
                     >
                         {editing ? "Cancel" : "Edit Profile"}
+                    </button>
+                    <button
+                        onClick={() => setAdd(!add)}
+                        className="w-full sm:w-auto px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-sm sm:text-base"
+                    >
+                        {add ? "Cancel" : "Add Address"}
                     </button>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-sm sm:text-base">

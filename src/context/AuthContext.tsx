@@ -2,11 +2,13 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import FullScreenLoader from "@/components/fullscreenloader";
 
 type User = {
     id: string;
     name: string;
     email: string;
+    phone: string;
 };
 
 type AuthContextType = {
@@ -49,9 +51,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await axios.get("/api/user/logout");
         setUser(null);
     };
+    if (loading) return <FullScreenLoader />
 
     return (
-        <AuthContext.Provider value={{ user, loading, logout }}>
+        <AuthContext.Provider value={{ user, loading, logout, }}>
             {children}
         </AuthContext.Provider>
     );
