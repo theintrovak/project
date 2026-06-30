@@ -1,3 +1,4 @@
+"use client";
 export default function Loading() {
     return (
         <div className="p-6 grid md:grid-cols-2 gap-10 animate-pulse">

@@ -8,8 +8,10 @@ import { useRouter } from "next/navigation"
 export default function CartPage() {
 
     const router = useRouter();
-    const { cart, removeFromCart, clearCart, getTotalPrice, getTotalItems, updateQuantity } = useCart()
-    const total = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    const { cart, removeItem, clearCart, getTotalPrice, getTotalItems, updateQuantity } = useCart()
+    const total = getTotalPrice();
+    console.log(cart);
+
 
 
 
@@ -17,17 +19,17 @@ export default function CartPage() {
     return (
         <div className="max-w-4xl mx-auto p-6">
             <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
-            {cart.map((item) => (
+            {cart?.map((item) => (
                 <div
                     key={item._id}
                     className="flex justify-between items-center border-b py-4"
                 >
                     <div>
-                        <img className="h-16 w-20" src={item.image?.[0]} alt={item.slug} />
+                        <img className="h-16 w-20" src={item.productId.images[0]} alt={item.productId.slug} />
                     </div>
                     <div>
-                        <h2>{item.name}</h2>
-                        <p>${item.price}</p>
+                        <h2>{item.productId.name}</h2>
+                        <p>${item.productId.price}</p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -52,7 +54,7 @@ export default function CartPage() {
                     </div>
 
                     <button
-                        onClick={() => removeFromCart(item._id)}
+                        onClick={() => removeItem(item._id)}
                         className="text-red-500"
                     >
                         Remove
@@ -63,6 +65,20 @@ export default function CartPage() {
                 <h2 className="text-xl font-semibold">
                     Total: ${total.toFixed(2)}
                 </h2>
+            </div>
+            <div className="flex justify-end mt-6">
+                <button
+                    className="border py-2 px-4 rounded bg-red-600 text-white"
+                    onClick={() => clearCart()}
+                >
+                    Clear Cart
+                </button>
+                <button
+                    className="border py-2 px-4 rounded bg-green-600 text-white ml-4"
+                    onClick={() => router.push("/checkout")}
+                >
+                    Checkout
+                </button>
             </div>
         </div>
     )

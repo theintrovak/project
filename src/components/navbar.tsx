@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
-import { Menu, X, ShoppingCart, User, Search } from "lucide-react";
+import { ShoppingCart, User, Search } from "lucide-react";
 import {
     Navbar,
     NavBody,
@@ -64,10 +64,10 @@ export default function NavBar() {
                     </div>
 
                     {/* Cart */}
-                    <Link href={user ? "/cart" : "/login"} className="relative rounded-md p-2 hover:bg-muted ">
+                    <a href={user ? "/cart" : "/login"} className="relative rounded-md p-2 hover:bg-muted ">
                         <ShoppingCart className="h-5 w-5" />
-                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white">{count}</span>
-                    </Link>
+                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[15px] text-red-500">{count}</span>
+                    </a>
 
                     {/* Profile */}
                     <Link href={user ? "/profile" : "/login"} className="hidden rounded-md p-2 hover:bg-muted md:block">

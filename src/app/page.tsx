@@ -1,4 +1,3 @@
-
 import FeaturedProduct from "@/components/porduct/featuredProduct";
 import AllProducts from "@/components/porduct/allProducts";
 import axios from 'axios';

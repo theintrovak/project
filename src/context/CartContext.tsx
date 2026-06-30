@@ -1,25 +1,37 @@
 "use client"
-import { createContext, useContext, useState, useEffect, use } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "./AuthContext";
+import axios from "axios";
 type cartItems = {
     _id: string;
-    name: string;
-    image: string;
-    price: number;
+    quantity: number;
+    size?: string;
+    color?: string;
+
+    productId: {
+        _id: string;
+        name: string;
+        slug: string;
+        price: number;
+        images: string[];
+    };
+};
+type cartItemsforadd = {
+    _id: string;
     quantity: number;
     color?: string;
     size?: string;
-    slug: string;
 }
 type CartContextType = {
     cart: cartItems[];
-    addToCart: (item: cartItems) => void;
-    removeFromCart: (id: string) => void;
+    addToCart: (item: cartItemsforadd) => void;
+    removeItem: (id: string) => void;
     updateQuantity: (id: string, quantity: number) => void;
     getTotalPrice: () => number;
     getTotalItems: () => number;
     clearCart: () => void;
+    loadCart: () => Promise<void>;
 }
 const CartContext = createContext<CartContextType | null>(null);
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
@@ -30,57 +42,65 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             setCart([]);
             return;
         }
-        const storedCart = localStorage.getItem(`cart-${user.id}`);
-        if (storedCart) {
-            setCart(JSON.parse(storedCart));
+        loadCart();
+
+
+    }, [user]);
+
+    const addToCart = async (item: cartItems) => {
+        try {
+            if (!user) { toast.error("Please login to add item to cart"); return; }
+            const { data } = await axios.post("/api/cart", item);
+            setCart(data.cart ?? []);
+            loadCart();
+            toast.success("Item added to cart");
+        } catch (error) {
+            console.log(error);
         }
-    }, [user])
-    useEffect(() => {
-        if (user) {
-            localStorage.setItem(`cart-${user.id}`, JSON.stringify(cart));
-        }
-    }, [cart, user])
-    const addToCart = (item: cartItems) => {
-        if (!user) {
-            toast.error("Please login to add items to cart");
-            return;
-        }
-        setCart((prev) => {
-            const existingItem = prev.find(
-                (p) => p._id === item._id && p.color === item.color && p.size === item.size
-            );
-            if (existingItem) {
-                return prev.map((p) => p === existingItem
-                    ? { ...p, quantity: p.quantity + item.quantity }
-                    : p)
-            }
-            return [...prev, { ...item, quantity: item.quantity }];
-        });
-        toast.success(`${item.name} added to cart`);
     }
-    const removeFromCart = (id: string) => {
-        if (!user) return;
-        setCart((prev) => prev.filter((p) => p._id !== id));
-        toast.success("Item removed from cart");
-    }
+
+
+    const loadCart = async () => {
+        try {
+            const { data } = await axios.get("/api/cart");
+            setCart(data?.items ?? []);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    const removeItem = async (itemId: string) => {
+        try {
+            await axios.delete(`/api/cart/${itemId}`);
+
+            loadCart();
+            toast.success("Item removed from cart");
+        } catch (error) {
+            console.error(error);
+        }
+    };
     const clearCart = () => {
-        if (!user) return;
-        setCart([]);
-        toast.success("Cart cleared");
+        axios.delete("/api/cart").then(() => {
+            setCart([]);
+            toast.success("Cart cleared");
+        })
+
     }
     const getTotalPrice = () => {
-        return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+        return cart.reduce((total, item) => total + item.productId.price * item.quantity, 0);
     }
 
     const getTotalItems = () => {
         return cart.reduce((total, item) => total + item.quantity, 0);
     }
-    const updateQuantity = (id: string, quantity: number) => {
-        if (!user) return;
-        setCart((prev) => prev.map((p) => p._id === id ? { ...p, quantity } : p));
+    const updateQuantity = (itemId: string, quantity: number) => {
+        axios.patch(`/api/cart/${itemId}`, { quantity, }).then(() => {
+            loadCart();
+            toast.success("Item quantity updated");
+        })
+
     }
     return (
-        <CartContext.Provider value={{ cart, removeFromCart, clearCart, addToCart, getTotalPrice, getTotalItems, updateQuantity }}>
+        <CartContext.Provider value={{ cart, loadCart, removeItem, clearCart, addToCart, getTotalPrice, getTotalItems, updateQuantity }}>
             {children}
         </CartContext.Provider>
     )

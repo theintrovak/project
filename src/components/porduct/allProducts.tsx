@@ -1,6 +1,7 @@
 "use client"
 
 
+
 const ProductCard = ({ name, price, image, slug }: any) => (
     <div className="group relative flex flex-col w-full  overflow-hidden rounded-lg border border-gray-200 bg-white"
         onClick={() => window.location.href = `/product/${slug}`}
@@ -16,6 +17,7 @@ const ProductCard = ({ name, price, image, slug }: any) => (
             <h3 className="text-sm font-medium text-gray-900">{name}</h3>
             <p className="text-sm text-gray-700">Rs. {price}</p>
         </div>
+
     </div>
 )
 

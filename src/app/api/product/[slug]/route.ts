@@ -12,7 +12,7 @@ export async function GET(
     try {
         const { slug } = await context.params;
         const product = await Product.findOne({ slug });
-        console.log(product);
+
 
         if (!product) {
             return NextResponse.json({ message: "product not found", success: false }, { status: 404 });

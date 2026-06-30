@@ -20,7 +20,6 @@ export default function AddToCartSection({ product }: Props) {
         product.sizes?.[0] || ""
     );
     const [quantity, setQuantity] = useState(1);
-    console.log(product)
 
     return (
         <div className="mt-6 space-y-4">
@@ -83,12 +82,8 @@ export default function AddToCartSection({ product }: Props) {
                 onClick={() =>
                     addToCart({
                         _id: product._id,
-                        name: product.name,
-                        price: product.price,
-                        slug: product.slug,
                         color: selectedColor,
                         size: selectedSize,
-                        image: product.images,
                         quantity,
                     })
                 }
