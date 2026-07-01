@@ -6,10 +6,8 @@ import Cart from "@/models/cartModel";
 import User from "@/models/userModel";
 import Product from "@/models/productModel";
 
-connectDB();
 
 export async function POST(request: Request) {
-    const userId = await getDataFromToken();
     const reqBody = await request.json();
     try {
         await connectDB();
@@ -22,9 +20,9 @@ export async function POST(request: Request) {
             );
         }
 
-        // 3️⃣ Validate every cart item
-        const userCart = await Cart.findOne({ user: userId });
-        if (reqBody.orderItems.length === 0) {
+
+
+        if (!reqBody.orderItems?.length) {
             return NextResponse.json({ success: false, message: "Cart is empty" }, { status: 400 });
         }
         let totalAmount = 0;
@@ -44,8 +42,10 @@ export async function POST(request: Request) {
                     },
                     { status: 400 }
                 );
-                totalAmount += product.price * item.quantity;
+
             }
+            const totalPrice = product.price * item.quantity;
+            totalAmount += totalPrice;
         }
 
         // 5️⃣ Create order
@@ -57,13 +57,14 @@ export async function POST(request: Request) {
             itemsPrice: reqBody.itemsPrice,
             shippingPrice: reqBody.shippingPrice,
             taxPrice: reqBody.taxPrice,
-            totalPrice: reqBody.totalPrice,
+            totalPrice: totalAmount,
         });
         order.save();
 
         // 6️⃣ Clear cart
         await Cart.findOneAndDelete({ user: userId });
         return NextResponse.json({ success: true, message: "Order created successfully", order }, { status: 201 });
+
     } catch (error) {
         console.error(error);
         return NextResponse.json({ success: false, message: "Failed to create order" }, { status: 500 });

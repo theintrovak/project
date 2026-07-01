@@ -1,9 +1,8 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "@/components/ui/spinner"
 import toast from "react-hot-toast";
 

@@ -1,25 +1,45 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useCart } from "@/context/CartContext";
+import axios from "axios";
 
 type LineItem = {
-    id: string;
-    name: string;
-    detail: string;
-    qty: number;
-    price: number;
-};
+    productId,
+    name,
+    slug,
+    image,
+    quantity,
+    size,
+    color,
+    unitPrice,
+    totalPrice,
+}
 
-const ITEMS: LineItem[] = [
-    { id: "1", name: "Next.js Storefront Build", detail: "5-page site, App Router, CMS wired", qty: 1, price: 1450 },
-    { id: "2", name: "Stripe Integration", detail: "Checkout + webhooks", qty: 1, price: 350 },
-    { id: "3", name: "Priority revisions", detail: "2 rounds, 48h turnaround", qty: 1, price: 150 },
-];
 
+
+function fetchingCart() {
+    const { cart } = useCart();
+    console.log(cart);
+
+    const ITEMS: LineItem[] = cart.map((item) => ({
+        productId: item.productId,
+        name: item.productId.name,
+        slug: item.productId.slug,
+        image: item.productId.images[0],
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+        unitPrice: item.productId.price,
+        totalPrice: item.quantity * item.productId.price
+    }));
+    return ITEMS
+
+}
 const PAYMENT_METHODS = [
-    { id: "card", label: "Card" },
-    { id: "paypal", label: "PayPal" },
-    { id: "bank", label: "Bank transfer" },
+
+    { id: "UPI", label: "upi" },
+    { id: "COD", label: "Cadh On Delivery" },
 ] as const;
 
 function currency(n: number) {
@@ -27,16 +47,49 @@ function currency(n: number) {
 }
 
 export default function CheckoutPage() {
-    const [method, setMethod] = useState<(typeof PAYMENT_METHODS)[number]["id"]>("card");
+    const ITEMS = fetchingCart();
+
+    const [method, setMethod] = useState<(typeof PAYMENT_METHODS)[number]["id"]>("UPI");
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
     const [promo, setPromo] = useState("");
     const [promoApplied, setPromoApplied] = useState(false);
 
-    const subtotal = useMemo(() => ITEMS.reduce((s, i) => s + i.price * i.qty, 0), []);
+
+    const subtotal = useMemo(() => ITEMS.reduce((s, i) => s + i.unitPrice * i.quantity, 0), []);
     const discount = promoApplied ? Math.round(subtotal * 0.1) : 0;
     const tax = Math.round((subtotal - discount) * 0.0825);
     const total = subtotal - discount + tax;
+    const [order, setOrder] = useState({
+        orderItems: ITEMS,
+        shippingAddress: {
+            fullname: "",
+            phone: "",
+            country: "",
+            addressLine1: "",
+            addressLine2: "",
+            city: "",
+            postalCode: "",
+        },
+        pricing: {
+            subtotal: subtotal,
+            shippingCharge: 0,
+            tax: tax,
+            discount: discount,
+            totalAmount: total,
+        },
+        payment: {
+            paymentMethod: method,
+            paymentStatus: "",
+
+        },
+        coupon: {
+            couponCode: "",
+            discount: 0,
+        },
+        orderStatus: ""
+
+    });
 
     function applyPromo() {
         if (promo.trim().toUpperCase() === "FIRST10") setPromoApplied(true);
@@ -45,10 +98,11 @@ export default function CheckoutPage() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setSubmitting(true);
-        setTimeout(() => {
+        axios.post("/api/orders", order).then(() => {
             setSubmitting(false);
             setDone(true);
-        }, 1200);
+        })
+
     }
 
     if (done) {
@@ -56,11 +110,23 @@ export default function CheckoutPage() {
             <main className="min-h-screen bg-[#F4F1EA] flex items-center justify-center px-6">
                 <div className="max-w-md w-full text-center">
                     <div className="mx-auto mb-6 w-14 h-14 rounded-full bg-[#1C1B19] flex items-center justify-center">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M4 12.5l5 5L20 7" stroke="#C9A24B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg width="22"
+                            height="22"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <path
+                                d="M4 12.5l5 5L20 7"
+                                stroke="#C9A24B"
+                                strokeWidth="2.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
                         </svg>
                     </div>
-                    <h1 className="font-serif text-3xl text-[#1C1B19] mb-2">Payment received</h1>
+                    <h1
+                        className="font-serif text-3xl text-[#1C1B19] mb-2"
+                    >Payment received</h1>
                     <p className="text-[#5C584F] mb-8">
                         Receipt sent. A confirmation email is on its way, and your project kicks off within one business day.
                     </p>
@@ -70,11 +136,14 @@ export default function CheckoutPage() {
         );
     }
 
+
     return (
         <main className="min-h-screen bg-[#F4F1EA] text-[#1C1B19]">
             <header className="border-b border-[#1C1B19]/10">
                 <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-                    <span className="font-serif text-xl tracking-tight">Anurag&nbsp;Studio</span>
+                    <span
+                        className="font-serif text-xl tracking-tight"
+                    >Anurag&nbsp;Studio</span>
                     <span className="text-xs uppercase tracking-[0.2em] text-[#5C584F]">Secure checkout</span>
                 </div>
             </header>
@@ -82,24 +151,65 @@ export default function CheckoutPage() {
             <div className="max-w-6xl mx-auto px-6 py-10 grid lg:grid-cols-[1fr_420px] gap-10">
                 {/* Form column */}
                 <form onSubmit={handleSubmit} className="space-y-10 order-2 lg:order-1">
+                    {/* contact */}
                     <section>
                         <h2 className="font-serif text-2xl mb-5">Contact</h2>
                         <div className="grid sm:grid-cols-2 gap-4">
-                            <Field label="Full name" placeholder="Jordan Hayes" required />
-                            <Field label="Email" type="email" placeholder="jordan@company.com" required />
+                            <Field
+                                label="Full name"
+                                value={order.shippingAddress.fullname}
+                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, fullname: e.target.value } })} placeholder="Anurag Kurmi "
+                                required
+                            />
+                            <Field
+                                label="Phone"
+                                value={order.shippingAddress.phone}
+                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, phone: e.target.value } })}
+                                placeholder="+91 999999999"
+                                required
+                            />
                         </div>
                     </section>
-
+                    {/* address */}
                     <section>
                         <h2 className="font-serif text-2xl mb-5">Billing address</h2>
                         <div className="grid sm:grid-cols-2 gap-4">
-                            <Field label="Country" placeholder="United States" required className="sm:col-span-2" />
-                            <Field label="Address" placeholder="123 Market St" required className="sm:col-span-2" />
-                            <Field label="City" placeholder="Austin" required />
-                            <Field label="Postal code" placeholder="78701" required />
+                            <Field
+                                label="Country"
+                                value={order.shippingAddress.country}
+                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, country: e.target.value } })} placeholder="United States"
+                                required
+                                className="sm:col-span-2"
+                            />
+                            <Field
+                                label="Address Line 1"
+                                value={order.shippingAddress.addressLine1}
+                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, addressLine1: e.target.value } })}
+                                placeholder="123 Market St"
+                                required
+                                className="sm:col-span-2"
+                            />
+                            <Field
+                                label="Address Line 2"
+                                value={order.shippingAddress.addressLine2} onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, addressLine2: e.target.value } })} placeholder="123 Market St"
+                                required
+                                className="sm:col-span-2"
+                            />
+                            <Field
+                                label="City"
+                                value={order.shippingAddress.city}
+                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, city: e.target.value } })}
+                                placeholder="Austin"
+                                required
+                            />
+                            <Field
+                                label="Postal code"
+                                value={order.shippingAddress.postalCode} onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, postalCode: e.target.value } })} placeholder="78701"
+                                required
+                            />
                         </div>
                     </section>
-
+                    {/* PAyment */}
                     <section>
                         <h2 className="font-serif text-2xl mb-5">Payment method</h2>
                         <div className="grid grid-cols-3 gap-3 mb-5">
@@ -118,24 +228,20 @@ export default function CheckoutPage() {
                             ))}
                         </div>
 
-                        {method === "card" && (
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                <Field label="Card number" placeholder="4242 4242 4242 4242" required className="sm:col-span-2" />
-                                <Field label="Expiry" placeholder="MM / YY" required />
-                                <Field label="CVC" placeholder="123" required />
-                            </div>
-                        )}
-                        {method === "paypal" && (
+
+                        {method === "UPI" && (
                             <p className="text-sm text-[#5C584F] bg-white/60 border border-[#1C1B19]/10 rounded-md p-4">
-                                You'll be redirected to PayPal to complete this payment after review.
+                                You'll be redirected to Gpay to complete this payment after review.
                             </p>
                         )}
-                        {method === "bank" && (
+                        {method === "COD" && (
                             <p className="text-sm text-[#5C584F] bg-white/60 border border-[#1C1B19]/10 rounded-md p-4">
-                                Bank details and a payment reference will be emailed once you confirm the order.
+                                You'll be redirected to completed  after review.
                             </p>
                         )}
                     </section>
+
+                    {/* submit */}
 
                     <button
                         type="submit"
@@ -156,12 +262,12 @@ export default function CheckoutPage() {
 
                         <ul className="px-6 py-5 space-y-4">
                             {ITEMS.map((item) => (
-                                <li key={item.id} className="flex justify-between gap-4 text-sm">
+                                <li key={item.slug} className="flex justify-between gap-4 text-sm">
                                     <div>
                                         <p className="font-medium">{item.name}</p>
-                                        <p className="text-[#8B8678]">{item.detail}</p>
+
                                     </div>
-                                    <span className="whitespace-nowrap font-medium">{currency(item.price * item.qty)}</span>
+                                    <span className="whitespace-nowrap font-medium">{currency(item.unitPrice * item.quantity)}</span>
                                 </li>
                             ))}
                         </ul>
