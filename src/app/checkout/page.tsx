@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 type LineItem = {
     productId,
@@ -97,12 +98,21 @@ export default function CheckoutPage() {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setSubmitting(true);
-        axios.post("/api/orders", order).then(() => {
-            setSubmitting(false);
+        const loadingToast = toast.loading("Processing your order...");
+        try {
+            setSubmitting(true);
+            const response = axios.post("/api/orders", order);
+            if (response) {
+                toast.dismiss(loadingToast);
+                toast.success("Order placed successfully!");
+            }
             setDone(true);
-        })
-
+        } catch (error) {
+            toast.error("Something went wrong!");
+            console.log(error);
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     if (done) {
