@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import PhoneInput from 'react-phone-input-2'
 import Image from "next/image";
-import { Edit2, Mail, MapPin, Phone, LogOut, Settings, Calendar } from "lucide-react";
+import { Edit2, Mail, MapPin, Phone, LogOut, Settings, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -10,9 +11,16 @@ import axios from "axios";
 export default function ProfilePage() {
     const router = useRouter();
     const [editing, setEditing] = useState(false);
-    const [add, setAdd] = useState(false);
+    const [updatedUser, setUpdatedUser] = useState(
+        {
+            name: "",
+            email: "",
+            phone: "",
+        }
+    );
     const { user } = useAuth();
     const [orderData, setOrderData] = useState([]);
+
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -26,7 +34,22 @@ export default function ProfilePage() {
 
         fetchOrders();
     }, []);
-    console.log(orderData);
+    const handleUpdate = async () => {
+        const loadingToast = toast.loading("updating user...");
+        try {
+            const response = await axios.put("/api/user/update", updatedUser);
+            toast.dismiss(loadingToast);
+            if (response) {
+                toast.success("User updated successfully!");
+                router.refresh();
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) return toast.error(error.message);
+        } finally {
+            toast.dismiss(loadingToast);
+        }
+
+    }
 
     const handleLogout = async () => {
         const loadingToast = toast.loading("Logging out...");
@@ -75,21 +98,29 @@ export default function ProfilePage() {
 
                 {/* Editable Form / Info Section */}
                 {editing ? (
-                    <form className="flex flex-col gap-3 sm:gap-4">
+                    <form className="flex flex-col gap-3 sm:gap-4" onSubmit={handleUpdate} >
                         <input
                             type="text"
                             placeholder="Full Name"
+                            value={updatedUser.name}
+                            onChange={(e) => setUpdatedUser({ ...updatedUser, name: e.target.value })}
                             className="bg-transparent border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
                         />
                         <input
                             type="email"
                             placeholder="Email"
+                            value={updatedUser.email}
+                            onChange={(e) => setUpdatedUser({ ...updatedUser, email: e.target.value })}
                             className="bg-transparent border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
                         />
                         <input
-                            type="text"
-                            placeholder="Phone Number"
+                            type="numbern"
+                            placeholder="Phone"
+                            value={updatedUser.phone}
+                            onChange={(e) => setUpdatedUser({ ...updatedUser, phone: e.target.value })}
                             className="bg-transparent border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
+                            maxLength={10}
+                            minLength={10}
                         />
 
                         <button
@@ -121,20 +152,19 @@ export default function ProfilePage() {
                     <h3 className="text-lg font-semibold text-white mb-3">Recent Orders</h3>
                     {orderData?.map((order: any) => (
                         <div key={orderData[0]?._id} className="mb-4 flex flex-col sm:flex-row justify-between gap-4">
-                            <div>
+                            <div className="flex flex-col border-b border-white p-2 rounded-2xl w-full">
                                 <p className="flex items-center gap-2">
-                                    <Calendar size={16} className="text-amber-500" />{" "}
-                                    {new Date(orderData[0]?.createdAt).toLocaleDateString("en-US", {
-                                        day: "numeric",
-                                        month: "long",
-                                        year: "numeric",
-                                    })}
+                                    <ShoppingBag size={16} className="text-amber-500" />{" "}
+                                    {orderData[0]?.orderItems[0]?.name}
                                 </p>
                                 <p className="flex items-center gap-2 mt-1">
-                                    <MapPin size={16} className="text-amber-500" />{" "}
+                                    <MapPin size={16} className="text-amber-500" />{" "}{orderData[0]?.shippingAddress.addressLine1}
                                 </p>
-                            </div>
+                                <div className="flex items-center gap-2 mt-1">
 
+
+                                </div>
+                            </div>
                         </div>
                     ))}
 
@@ -148,12 +178,7 @@ export default function ProfilePage() {
                     >
                         {editing ? "Cancel" : "Edit Profile"}
                     </button>
-                    <button
-                        onClick={() => setAdd(!add)}
-                        className="w-full sm:w-auto px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-sm sm:text-base"
-                    >
-                        {add ? "Cancel" : "Add Address"}
-                    </button>
+
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all text-sm sm:text-base">
                             <Settings size={18} /> Settings

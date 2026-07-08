@@ -122,4 +122,5 @@ const orderSchema = new mongoose.Schema<IOrder>({
     updatedAt: { type: Date, default: Date.now },
 });
 
-export const Order = mongoose.model<IOrder>("Order", orderSchema);
+//  Check the cache first. If it exists, use it. If not, compile it.
+export const Order = mongoose.models.Order || mongoose.model<IOrder>("Order", orderSchema);
