@@ -47,27 +47,56 @@ export async function POST(request: Request) {
             const totalPrice = product.price * item.quantity;
             totalAmount += totalPrice;
         }
+        console.log({
+            payment: reqBody.payment,
+            pricing: reqBody.pricing,
+        });
+        console.log(JSON.stringify(reqBody, null, 2));
+
 
         // 5️⃣ Create order
         const order = await Order.create({
             user: userId,
             orderItems: reqBody.orderItems,
             shippingAddress: reqBody.shippingAddress,
-            paymentMethod: reqBody.paymentMethod,
-            itemsPrice: reqBody.itemsPrice,
-            shippingPrice: reqBody.shippingPrice,
-            taxPrice: reqBody.taxPrice,
-            totalPrice: totalAmount,
+
+            pricing: {
+                subtotal: reqBody.pricing.subtotal,
+                tax: reqBody.pricing.tax,
+                discount: reqBody.pricing.discount,
+                totalAmount: reqBody.pricing.totalAmount,
+            },
+
+            payment: {
+                paymentMethod: reqBody.payment.paymentMethod,
+                paymentStatus: reqBody.payment.paymentStatus ?? "Pending",
+            },
+
+            coupon: {
+                couponCode: reqBody.coupon?.couponCode,
+                discount: reqBody.coupon?.discount ?? 0,
+            },
         });
         order.save();
 
         // 6️⃣ Clear cart
-        await Cart.findOneAndDelete({ user: userId });
+        await Cart.findOneAndDelete({ userId: userId });
         return NextResponse.json({ success: true, message: "Order created successfully", order }, { status: 201 });
 
     } catch (error) {
         console.error(error);
         return NextResponse.json({ success: false, message: "Failed to create order" }, { status: 500 });
+    }
+}
+export async function GET() {
+    try {
+        const userId = await getDataFromToken();
+        await connectDB();
+        const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+        return NextResponse.json(orders);
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ success: false, message: "Failed to get orders" }, { status: 500 });
     }
 }
 

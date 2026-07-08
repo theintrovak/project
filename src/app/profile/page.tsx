@@ -1,25 +1,32 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Edit2, Mail, MapPin, Phone, LogOut, Settings } from "lucide-react";
+import { Edit2, Mail, MapPin, Phone, LogOut, Settings, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
-export default function ProfilePage() {
 
-    interface User {
-        _id: string;
-        name: string;
-        email: string;
-        isAdmin: boolean;
-        isVerified: boolean;
-        __v: number;
-    }
+export default function ProfilePage() {
     const router = useRouter();
     const [editing, setEditing] = useState(false);
     const [add, setAdd] = useState(false);
     const { user } = useAuth();
+    const [orderData, setOrderData] = useState([]);
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const { data } = await axios.get("/api/orders");
+                setOrderData(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchOrders();
+    }, []);
+    console.log(orderData);
 
     const handleLogout = async () => {
         const loadingToast = toast.loading("Logging out...");
@@ -38,7 +45,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#292929] flex justify-center items-center px-4 py-10">
+        <div className="min-h-screen bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#292929] flex justify-center items-center px-4 py-10">
             <div className="bg-white/10 backdrop-blur-lg p-6 sm:p-8 md:p-10 rounded-2xl shadow-lg w-full max-w-md sm:max-w-lg md:max-w-3xl border border-white/10">
 
                 {/* Header Section */}
@@ -58,7 +65,7 @@ export default function ProfilePage() {
                             <Edit2 size={16} />
                         </button>
                     </div>
-                    <h1 className="text-2xl mt-4 font-semibold text-white break-words">
+                    <h1 className="text-2xl mt-4 font-semibold text-white break-all">
                         {user?.name}
                     </h1>
                     <p className="text-gray-300 flex flex-col sm:flex-row sm:items-center sm:gap-2 mt-1 text-sm sm:text-base">
@@ -100,48 +107,37 @@ export default function ProfilePage() {
                         <p className="flex items-center gap-2 break-all">
                             <Phone size={16} className="text-amber-500" /> +{user?.phone}
                         </p>
-                        <p className="flex items-center gap-2 mt-1 break-words">
-                            <MapPin size={16} className="text-amber-500" /> New Delhi, India
+                        <p className="flex items-center gap-2 mt-1 break-all">
+                            <MapPin size={16} className="text-amber-500" />
+                            {orderData[0]?.shippingAddress.city}
                         </p>
                     </div>
                 )}
                 {/* Add Address */}
-                {add && (
 
-                    <form className="flex flex-col gap-3 sm:gap-4">
-                        <p className="font-bold mt-5 text-amber-100 ">Add Your Address</p>
-                        <input
-                            type="text"
-                            placeholder="Address"
-                            className="bg-transparent border border-gray-600 rounded-lg p-2  text-white focus:ring-2 focus:ring-amber-500 outline-none text-sm sm:text-base"
-                        />
-                        <button
-                            type="submit"
-                            className="bg-amber-500 hover:bg-amber-600 rounded-lg py-2 text-white font-semibold transition-all text-sm sm:text-base"
-                        >
-                            Add Address
-                        </button>
-
-                    </form>
-                )}
 
                 {/* Order Summary */}
                 <div className="bg-white/5 p-4 rounded-xl mt-8 text-sm sm:text-base">
                     <h3 className="text-lg font-semibold text-white mb-3">Recent Orders</h3>
-                    <div className="space-y-3 text-gray-300">
-                        <div className="flex justify-between items-center border-b border-white/10 pb-2 flex-wrap">
-                            <span>Order #12345</span>
-                            <span className="text-amber-400 font-medium">Delivered</span>
+                    {orderData?.map((order: any) => (
+                        <div key={orderData[0]?._id} className="mb-4 flex flex-col sm:flex-row justify-between gap-4">
+                            <div>
+                                <p className="flex items-center gap-2">
+                                    <Calendar size={16} className="text-amber-500" />{" "}
+                                    {new Date(orderData[0]?.createdAt).toLocaleDateString("en-US", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                    })}
+                                </p>
+                                <p className="flex items-center gap-2 mt-1">
+                                    <MapPin size={16} className="text-amber-500" />{" "}
+                                </p>
+                            </div>
+
                         </div>
-                        <div className="flex justify-between items-center border-b border-white/10 pb-2 flex-wrap">
-                            <span>Order #12346</span>
-                            <span className="text-gray-400 font-medium">Processing</span>
-                        </div>
-                        <div className="flex justify-between items-center flex-wrap">
-                            <span>Order #12347</span>
-                            <span className="text-red-400 font-medium">Cancelled</span>
-                        </div>
-                    </div>
+                    ))}
+
                 </div>
 
                 {/* Action Buttons */}

@@ -6,49 +6,44 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 type LineItem = {
-    productId,
-    name,
-    slug,
-    image,
-    quantity,
-    size,
-    color,
-    unitPrice,
-    totalPrice,
+    productId: string;
+    name: string;
+    slug: string;
+    image: string;
+    quantity: number;
+    size?: string;
+    color?: string;
+    unitPrice: number;
+    totalPrice: number;
 }
 
-
-
-function fetchingCart() {
-    const { cart } = useCart();
-    console.log(cart);
-
-    const ITEMS: LineItem[] = cart.map((item) => ({
-        productId: item.productId,
-        name: item.productId.name,
-        slug: item.productId.slug,
-        image: item.productId.images[0],
-        quantity: item.quantity,
-        size: item.size,
-        color: item.color,
-        unitPrice: item.productId.price,
-        totalPrice: item.quantity * item.productId.price
-    }));
-    return ITEMS
-
-}
 const PAYMENT_METHODS = [
 
     { id: "UPI", label: "upi" },
-    { id: "COD", label: "Cadh On Delivery" },
+    { id: "COD", label: "Cash On Delivery" },
 ] as const;
 
 function currency(n: number) {
-    return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+    return n.toLocaleString("en-IN", { style: "currency", currency: "INR" });
 }
 
 export default function CheckoutPage() {
-    const ITEMS = fetchingCart();
+    const { cart } = useCart();
+
+
+    const ITEMS: LineItem[] = useMemo(() =>
+        cart.map((item) => ({
+            productId: item.productId._id,
+            name: item.productId.name,
+            slug: item.productId.slug,
+            image: item.productId.images[0],
+            quantity: item.quantity,
+            size: item.size,
+            color: item.color,
+            unitPrice: item.productId.price,
+            totalPrice: item.quantity * item.productId.price
+        }))
+        , [cart]);
 
     const [method, setMethod] = useState<(typeof PAYMENT_METHODS)[number]["id"]>("UPI");
     const [submitting, setSubmitting] = useState(false);
@@ -57,62 +52,97 @@ export default function CheckoutPage() {
     const [promoApplied, setPromoApplied] = useState(false);
 
 
-    const subtotal = useMemo(() => ITEMS.reduce((s, i) => s + i.unitPrice * i.quantity, 0), []);
+
+    const subtotal = useMemo(() => ITEMS.reduce((s, i) => s + i.unitPrice * i.quantity, 0), [ITEMS]);
     const discount = promoApplied ? Math.round(subtotal * 0.1) : 0;
     const tax = Math.round((subtotal - discount) * 0.0825);
     const total = subtotal - discount + tax;
-    const [order, setOrder] = useState({
+    console.log(`discount: ${discount}, payment method: ${method}, tax: ${tax}`);
+    const [shippingAddress, setShippingAddress] = useState({
+
+        fullName: "",
+        phone: "",
+        country: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        postalCode: "",
+
+
+    });
+    const order = {
         orderItems: ITEMS,
-        shippingAddress: {
-            fullname: "",
-            phone: "",
-            country: "",
-            addressLine1: "",
-            addressLine2: "",
-            city: "",
-            postalCode: "",
-        },
+        shippingAddress,
         pricing: {
             subtotal: subtotal,
-            shippingCharge: 0,
             tax: tax,
             discount: discount,
             totalAmount: total,
         },
         payment: {
             paymentMethod: method,
-            paymentStatus: "",
-
         },
-        coupon: {
-            couponCode: "",
-            discount: 0,
-        },
-        orderStatus: ""
-
-    });
-
+        coupon: promoApplied
+            ? {
+                couponCode: promo,
+                discount: discount,
+            }
+            : undefined,
+    };
     function applyPromo() {
         if (promo.trim().toUpperCase() === "FIRST10") setPromoApplied(true);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         const loadingToast = toast.loading("Processing your order...");
         try {
             setSubmitting(true);
-            const response = axios.post("/api/orders", order);
-            if (response) {
+            const response = await axios.post("/api/orders", order);
+            if (response.data.success) {
                 toast.dismiss(loadingToast);
                 toast.success("Order placed successfully!");
+                setDone(true);
             }
-            setDone(true);
+
         } catch (error) {
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message ?? "Something went wrong")
+            }
+            toast.dismiss(loadingToast);
             toast.error("Something went wrong!");
             console.log(error);
         } finally {
             setSubmitting(false);
         }
+    }
+    if (ITEMS.length === 0) {
+        return (
+            <main className="min-h-screen bg-[#F4F1EA] flex items-center justify-center px-6">
+                <div className="max-w-md w-full text-center">
+                    <h1 className="font-serif text-3xl text-[#1C1B19] mb-2">
+                        Your cart is empty
+                    </h1>
+                    <p className="text-[#5C584F] mb-8">
+                        Looks like you have not added anything to your cart yet.
+                    </p>
+                </div>
+            </main>
+        );
+    }
+    if (submitting) {
+        return (
+            <main className="min-h-screen bg-[#F4F1EA] flex items-center justify-center px-6">
+                <div className="max-w-md w-full text-center">
+                    <h1 className="font-serif text-3xl text-[#1C1B19] mb-2">
+                        Processing your order
+                    </h1>
+                    <p className="text-[#5C584F] mb-8">
+                        Please wait, we are processing your order.
+                    </p>
+                </div>
+            </main>
+        );
     }
 
     if (done) {
@@ -136,11 +166,21 @@ export default function CheckoutPage() {
                     </div>
                     <h1
                         className="font-serif text-3xl text-[#1C1B19] mb-2"
-                    >Payment received</h1>
+                    >{method === "COD" ? "Order placed successfully!" : "Order placed successfully!"}</h1>
                     <p className="text-[#5C584F] mb-8">
                         Receipt sent. A confirmation email is on its way, and your project kicks off within one business day.
                     </p>
-                    <p className="text-sm tracking-widest uppercase text-[#9C8A5E]">Order #4471 · {currency(total)}</p>
+                    <p className="text-sm tracking-widest uppercase text-[#9C8A5E]"> {order.orderItems.map((item) => (
+                        <li key={`${item.productId}-${item.size}-${item.color}`} className="flex justify-between gap-4 text-sm">
+                            <div>
+                                <p className="font-medium">{item.name}</p>
+
+                            </div>
+                            <span className="whitespace-nowrap font-medium">{currency(item.unitPrice * item.quantity)}</span>
+                        </li>
+                    ))}
+                        <h4>TOTAL = {currency(order.pricing.totalAmount)}</h4></p>
+
                 </div>
             </main>
         );
@@ -167,16 +207,20 @@ export default function CheckoutPage() {
                         <div className="grid sm:grid-cols-2 gap-4">
                             <Field
                                 label="Full name"
-                                value={order.shippingAddress.fullname}
-                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, fullname: e.target.value } })} placeholder="Anurag Kurmi "
+                                value={shippingAddress.fullName}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, fullName: e.target.value })} placeholder="Anurag Kurmi "
                                 required
+                                minLength={3}
+                                maxLength={20}
                             />
                             <Field
                                 label="Phone"
-                                value={order.shippingAddress.phone}
-                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, phone: e.target.value } })}
+                                value={shippingAddress.phone}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, phone: e.target.value })}
                                 placeholder="+91 999999999"
                                 required
+                                minLength={10}
+                                maxLength={10}
                             />
                         </div>
                     </section>
@@ -186,36 +230,37 @@ export default function CheckoutPage() {
                         <div className="grid sm:grid-cols-2 gap-4">
                             <Field
                                 label="Country"
-                                value={order.shippingAddress.country}
-                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, country: e.target.value } })} placeholder="United States"
+                                value={shippingAddress.country}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })} placeholder="India"
                                 required
                                 className="sm:col-span-2"
                             />
                             <Field
                                 label="Address Line 1"
-                                value={order.shippingAddress.addressLine1}
-                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, addressLine1: e.target.value } })}
-                                placeholder="123 Market St"
+                                value={shippingAddress.addressLine1}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, addressLine1: e.target.value })}
+                                placeholder="123 SISWA BAZAR"
                                 required
                                 className="sm:col-span-2"
                             />
                             <Field
                                 label="Address Line 2"
-                                value={order.shippingAddress.addressLine2} onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, addressLine2: e.target.value } })} placeholder="123 Market St"
-                                required
+                                value={shippingAddress.addressLine2} onChange={(e) => setShippingAddress({ ...shippingAddress, addressLine2: e.target.value })} placeholder="123 GANDHI NAGAR"
+
                                 className="sm:col-span-2"
                             />
                             <Field
                                 label="City"
-                                value={order.shippingAddress.city}
-                                onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, city: e.target.value } })}
-                                placeholder="Austin"
+                                value={shippingAddress.city}
+                                onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                                placeholder="MAHARAJGANJ"
                                 required
                             />
                             <Field
                                 label="Postal code"
-                                value={order.shippingAddress.postalCode} onChange={(e) => setOrder({ ...order, shippingAddress: { ...order.shippingAddress, postalCode: e.target.value } })} placeholder="78701"
+                                value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value })} placeholder="272163"
                                 required
+                                pattern="[0-9]{6}"
                             />
                         </div>
                     </section>
@@ -272,7 +317,7 @@ export default function CheckoutPage() {
 
                         <ul className="px-6 py-5 space-y-4">
                             {ITEMS.map((item) => (
-                                <li key={item.slug} className="flex justify-between gap-4 text-sm">
+                                <li key={`${item.productId}-${item.size}-${item.color}`} className="flex justify-between gap-4 text-sm">
                                     <div>
                                         <p className="font-medium">{item.name}</p>
 

@@ -17,7 +17,6 @@ export interface IShippingAddress {
     addressLine1: string;
     addressLine2?: string;
     city: string;
-    state: string;
     postalCode: string;
     country: string;
 }
@@ -99,21 +98,21 @@ const orderSchema = new mongoose.Schema<IOrder>({
         country: { type: String, required: true },
     },
     pricing: {
-        subtotal: { type: Number, required: true },
-        shippingCharge: { type: Number, required: true },
+        subtotal: { type: Number, },
+
         tax: { type: Number, required: true },
-        discount: { type: Number, required: true },
-        totalAmount: { type: Number, required: true },
+        discount: { type: Number, required: true, default: 0 },
+        totalAmount: { type: Number, },
     },
     payment: {
-        paymentMethod: { type: String, required: true },
+        paymentMethod: { type: String, required: true, },
         paymentStatus: { type: String, default: "Paid" },
         transactionId: { type: String },
         paidAt: { type: Date },
     },
     coupon: {
         couponCode: { type: String },
-        discount: { type: Number, required: true },
+        discount: { type: Number, default: 0 },
     },
     orderStatus: { type: String, default: "Confirmed" },
     deliveredAt: { type: Date },
