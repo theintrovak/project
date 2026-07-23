@@ -30,9 +30,10 @@ export async function PUT(
     req: NextRequest,
     { params }: { params: Promise<{ slug: string }> }
 ) {
+    const slug = (await params).slug
     try {
         const Body = await req.json();
-        const updatedProduct = await Product.findOneAndUpdate({ slug: (await params).slug }, Body, { new: true });
+        const updatedProduct = await Product.findOneAndUpdate({ slug: slug }, Body, { new: true });
 
         return NextResponse.json(updatedProduct);
     } catch (error) {
@@ -41,11 +42,24 @@ export async function PUT(
     }
 }
 // Delete Product
-export async function DELETE(req: Request, { params }: { params: { slug: string } }) {
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ slug: string }> }
+) {
+    const slug = (await params).slug
     try {
-        await Product.findOneAndDelete({ slug: params.slug });
-        return NextResponse.json({ message: "product deleted successfully", success: true }, { status: 200 });
+        const deletedProduct = await Product.findOneAndDelete({ slug: slug });
+        if (!deletedProduct) {
+            return NextResponse.json({ message: "product not found", success: false }, { status: 404 });
+        }
+        return NextResponse.json({
+            message: "product deleted successfully",
+            success: true
+        },
+            { status: 200 });
     } catch (error) {
-        return NextResponse.json({ message: "something went wrong ", success: false }, { status: 500 });
+        return NextResponse.json({ message: "something went wrong ", success: false },
+            { status: 500 }
+        );
     }
 }   
