@@ -18,8 +18,8 @@ export default async function Home() {
   return (
     <>
       <main className="bg-gray-300">
-        <FeaturedProduct products={products.data} />
-        <AllProducts products={allProducts.data} />
+        <FeaturedProduct products={products} />
+        <AllProducts products={allProducts} />
 
       </main>
     </>
