@@ -9,7 +9,7 @@ export default async function Home() {
 
   return (
     <>
-      <main>
+      <main className="bg-gray-300">
         <FeaturedProduct products={products.data} />
         <AllProducts products={allProducts.data} />
 
