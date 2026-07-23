@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/dbconfig/dbconfig";
 import Product from "@/models/productModel";
 
@@ -26,10 +26,13 @@ export async function GET(
     }
 }
 //update product 
-export async function PUT(req: Request, { params }: { params: { slug: string } }) {
+export async function PUT(
+    req: NextRequest,
+    { params }: { params: Promise<{ slug: string }> }
+) {
     try {
         const Body = await req.json();
-        const updatedProduct = await Product.findOneAndUpdate({ slug: params.slug }, Body, { new: true });
+        const updatedProduct = await Product.findOneAndUpdate({ slug: (await params).slug }, Body, { new: true });
 
         return NextResponse.json(updatedProduct);
     } catch (error) {
