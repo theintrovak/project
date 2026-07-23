@@ -27,9 +27,10 @@ export default function NavBar() {
 
     const count = getTotalItems();
     const navItems = [
+
         {
             name: "Shop",
-            link: "/",
+            link: "/shop",
         },
         {
             name: "Categories",
