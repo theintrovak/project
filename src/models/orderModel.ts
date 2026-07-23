@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 
 export interface IOrderItem {
     productId: mongoose.Types.ObjectId;
@@ -123,4 +123,4 @@ const orderSchema = new mongoose.Schema<IOrder>({
 });
 
 //  Check the cache first. If it exists, use it. If not, compile it.
-export const Order = mongoose.models.Order || mongoose.model<IOrder>("Order", orderSchema);
+export const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>("Order", orderSchema);
